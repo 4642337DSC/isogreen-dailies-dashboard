@@ -2296,10 +2296,11 @@
 
   // Shared delta-vs-median formatter, used by the engagement panels below
   // and by the chart tabs' bar rows. Every compare metric here is "more is
-  // better" - no per-metric direction needed. Count/seconds metrics show an
-  // absolute difference (a "%" on a raw count reads oddly against a small
-  // baseline); percent metrics show a relative percentage, since both sides
-  // are already 0-100 numbers.
+  // better" - no per-metric direction needed. All three units show an
+  // absolute difference (count, seconds, or percentage points) rather than
+  // a relative-to-median percentage - for a metric already expressed as a
+  // percent (hook rate, avg % watched), a median of 50% and a video at 55%
+  // reads as "+5%", not "+10%" (which is what diff/med would say).
   function computeDelta(v, med, unit) {
     if (typeof v !== "number" || typeof med !== "number") return null;
     var diff = v - med;
@@ -2310,10 +2311,9 @@
     } else if (unit === "seconds") {
       text = (diff > 0 ? "+" : "") + diff.toFixed(1) + "s";
       flat = Math.abs(diff) < 0.5;
-    } else if (med !== 0) {
-      var deltaPct = Math.round((diff / med) * 1000) / 10;
-      text = (deltaPct > 0 ? "+" : "") + deltaPct.toFixed(1) + "%";
-      flat = Math.abs(diff) < med * 0.03;
+    } else if (unit === "percent") {
+      text = (diff > 0 ? "+" : "") + diff.toFixed(1) + "%";
+      flat = Math.abs(diff) < 0.5;
     } else {
       return null;
     }
